@@ -4,9 +4,9 @@ import { Github, Linkedin, Twitter, Mail, MapPin, Calendar } from 'lucide-react'
 
 const Footer = () => {
     const socialLinks = [
-        { icon: <Github className="w-5 h-5" />, label: 'GitHub', href: '#' },
-        { icon: <Linkedin className="w-5 h-5" />, label: 'LinkedIn', href: '#' },
-        { icon: <Twitter className="w-5 h-5" />, label: 'Twitter', href: '#' },
+        { icon: <Github className="w-5 h-5" />, label: 'GitHub', href: 'https://github.com/BlockchainClubVITB' },
+        { icon: <Linkedin className="w-5 h-5" />, label: 'LinkedIn', href: 'https://linkedin.com/company/blockchain-club-vitb/' },
+        { icon: <Twitter className="w-5 h-5" />, label: 'Twitter', href: 'https://x.com/blockchainvitb' },
         { icon: <Mail className="w-5 h-5" />, label: 'Email', href: 'mailto:blockchain@vitbhopal.ac.in' }
     ];
 
