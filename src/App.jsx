@@ -5,6 +5,7 @@ import Rounds from './components/Rounds';
 import Prizes from './components/Prizes';
 import Mentoring from './components/Mentoring';
 import Footer from './components/Footer';
+import Navbar from './components/Navbar';
 import { GlobalSpotlight } from './components/MagicEffects';
 import { useIsMobile } from './hooks/useIsMobile';
 
@@ -13,6 +14,9 @@ function App() {
 
   return (
     <div className="min-h-screen">
+      {/* Navbar */}
+      <Navbar />
+
       {/* Disable GlobalSpotlight on mobile for performance */}
       <GlobalSpotlight
         enabled={!isMobile}

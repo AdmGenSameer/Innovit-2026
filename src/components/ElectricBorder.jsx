@@ -2,7 +2,7 @@
 // Component inspired by @BalintFerenczy on X
 // https://codepen.io/BalintFerenczy/pen/KwdoyEN
 
-import { useEffect, useId, useLayoutEffect, useRef } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 
 function hexToRgba(hex, alpha = 1) {
     if (!hex) return `rgba(0,0,0,${alpha})`;
@@ -20,6 +20,8 @@ function hexToRgba(hex, alpha = 1) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+const MOBILE_BREAKPOINT = 768;
+
 const ElectricBorder = ({ children, color = '#5227FF', speed = 1, chaos = 1, thickness = 2, className, style }) => {
     const rawId = useId().replace(/[:]/g, '');
     const filterId = `turbulent-displace-${rawId}`;
@@ -27,7 +29,34 @@ const ElectricBorder = ({ children, color = '#5227FF', speed = 1, chaos = 1, thi
     const rootRef = useRef(null);
     const strokeRef = useRef(null);
 
+    // Detect mobile for performance optimization
+    const [isMobile, setIsMobile] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return window.innerWidth <= MOBILE_BREAKPOINT;
+    });
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
+        };
+
+        let timeoutId;
+        const handleResize = () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(checkMobile, 150);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            clearTimeout(timeoutId);
+        };
+    }, []);
+
     const updateAnim = () => {
+        // Skip animation on mobile for performance
+        if (isMobile) return;
+
         const svg = svgRef.current;
         const host = rootRef.current;
         if (!svg || !host) return;
@@ -80,23 +109,43 @@ const ElectricBorder = ({ children, color = '#5227FF', speed = 1, chaos = 1, thi
     };
 
     useEffect(() => {
-        updateAnim();
+        if (!isMobile) {
+            updateAnim();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [speed, chaos]);
+    }, [speed, chaos, isMobile]);
 
     useLayoutEffect(() => {
-        if (!rootRef.current) return;
+        if (!rootRef.current || isMobile) return;
         const ro = new ResizeObserver(() => updateAnim());
         ro.observe(rootRef.current);
         updateAnim();
         return () => ro.disconnect();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [isMobile]);
 
     const inheritRadius = {
         borderRadius: style?.borderRadius ?? 'inherit'
     };
 
+    // Simple mobile border without SVG filters
+    if (isMobile) {
+        const simpleBorderStyle = {
+            ...inheritRadius,
+            border: `${thickness}px solid ${color}`,
+            boxShadow: `0 0 ${thickness * 4}px ${hexToRgba(color, 0.3)}, inset 0 0 ${thickness * 2}px ${hexToRgba(color, 0.1)}`
+        };
+
+        return (
+            <div ref={rootRef} className={'relative ' + (className ?? '')} style={{ ...style, ...simpleBorderStyle }}>
+                <div className="relative" style={inheritRadius}>
+                    {children}
+                </div>
+            </div>
+        );
+    }
+
+    // Full desktop version with SVG filters
     const strokeStyle = {
         ...inheritRadius,
         borderWidth: thickness,
